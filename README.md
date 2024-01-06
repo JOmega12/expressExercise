@@ -55,8 +55,7 @@ In other cases you may see paginated data, 20-50 items per page, then you have t
 In our case we just want an array of every single full dog object, we will likely expand on this in future assignments. Here is an example output of what json we would expect from a dog index endpoint (use the tests as your source of truth for what is expected from the tests not this Readme). Along with this data we should be returning a status code of 200 if successful.
 
 ```json
-[
-  {
+[67
     "id": 1,
     "name": "Doomslayer",
     "description": "Doomslayer is the best doggy ever",
