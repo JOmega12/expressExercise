@@ -12,78 +12,73 @@ app.get("/", (_req, res) => {
   res.json({ message: "Hello World!" }).status(200); // the 'status' is unnecessary but wanted to show you how to define a status
 });
 
-// BEFORE YOU START: 
-  // *npm run dev
-    // ?this shows experimental environment that you are able to create
-  // *npm run dev:test 
-    //? this shows the test environment where you can test
-  // * npm run seed
-    // ? this seeds the file 
-  // *Look at the package.json for more info
-
-
+// BEFORE YOU START:
 // /DOGS
 //INDEX ENDPOINT
-app.get('/dogs', async(req, res) => {
+app.get("/dogs", async (req, res) => {
   const allDogs = await prisma.dog.findMany();
-  // console.log(allDogs, 'allDogs');
   res.status(200).send(allDogs);
-})
+});
 
 // /DOGS/:ID
 // SHOW ENDPOINT
-app.get('/dogs/:id', async(req, res) => {
-
+app.get("/dogs/:id", async (req, res) => {
   const id = +req.params.id;
-  if(isNaN(id)) {
-    res.status(400).send({message :"id should be a number"})
+  if (isNaN(id)) {
+    res
+      .status(400)
+      .send({ message: "id should be a number" });
   }
   try {
     const dogs = await prisma.dog.findUnique({
       where: {
-        id: id
-      }
+        id: id,
+      },
     });
-    if(!dogs) {
-      res.status(204).send("No Dogs")
+    if (!dogs) {
+      res.status(204).send("No Dogs");
     }
     res.status(200).send(dogs);
-
-  } catch(e) {
+  } catch (e) {
     console.error(e);
     return res.status(204).send("No Doggos");
   }
-
-
-})
-
+});
 
 //  /DOGS
 //  CREATE ENDPOINT
-app.post("/dogs", async(req, res) => {
-  const {age, name, description, breed} = req.body;
-  const validKeys = ['name', 'description', 'age', 'breed'];
-  const errors = [];
+app.post("/dogs", async (req, res) => {
+  const { age, name, description, breed } = req.body;
+  const validKeys = ["name", "description", "age", "breed"];
+  const errors: string[] = [];
 
-  const invalidKeys = Object.keys(req.body).filter((item) => {
-    return !validKeys.includes(item);
-  })
+  const invalidKeys = Object.keys(req.body).filter(
+    (item) => {
+      return !validKeys.includes(item);
+    }
+  );
 
-  if(invalidKeys) {
-    for(const key of invalidKeys) {
+  if (invalidKeys) {
+    for (const key of invalidKeys) {
       errors.push(`'${key}' is not a valid key`);
     }
   }
-  if(errors.length > 0) {
-    return res.status(400).send({errors})
+  if (errors.length > 0) {
+    return res.status(400).send({ errors });
+  }
+  if (typeof age !== "number" || isNaN(age)) {
+    errors.push("age should be a number");
+  }
+  if (typeof name !== "string") {
+    errors.push("name should be a string");
+  }
+  if (typeof description !== "string") {
+    errors.push("description should be a string");
   }
 
-
-// this is to check the types
-if(typeof name !== "string") {
-  return res.status(400).send({error: "Name must be a string"})
-}
-
+  if (errors.length > 0) {
+    return res.status(400).send({ errors });
+  }
 
   try {
     const newDog = await prisma.dog.create({
@@ -91,37 +86,37 @@ if(typeof name !== "string") {
         age,
         name,
         description,
-        breed        
-      }
-    })
+        breed,
+      },
+    });
     return res.status(201).send(newDog);
-  } catch(e) {
+  } catch (e) {
     console.error(e);
-    return res.status(500).send({error: "errorr 500"})
+    return res.status(500).send({ error: "errorr 500" });
   }
-})
-
+});
 
 //  /DOGS/:id
 // UPDATE ENDPOINT aka Patch
-
-app.patch("/dogs/:id",async(req, res) => {
+app.patch("/dogs/:id", async (req, res) => {
   const id = +req.params.id;
-  const {description, name, age, breed} = req.body || {};
-  const validKeys = ['name', 'description', 'age', 'breed'];
+  const { description, name, age, breed } = req.body || {};
+  const validKeys = ["name", "description", "age", "breed"];
   const errors = [];
-  
-  const invalidKeys = Object.keys(req.body).filter((item) => {
-    return !validKeys.includes(item);
-  });
 
-  if(invalidKeys) {
-    for(const key of invalidKeys) {
-      errors.push(`'${key}' is not a valid key`)
+  const invalidKeys = Object.keys(req.body).filter(
+    (item) => {
+      return !validKeys.includes(item);
+    }
+  );
+
+  if (invalidKeys) {
+    for (const key of invalidKeys) {
+      errors.push(`'${key}' is not a valid key`);
     }
   }
-  if(errors.length > 0) {
-    return res.status(400).send({errors})
+  if (errors.length > 0) {
+    return res.status(400).send({ errors });
   }
 
   try {
@@ -135,51 +130,41 @@ app.patch("/dogs/:id",async(req, res) => {
     const updateDog = await prisma.dog.update({
       data: updateData,
       where: {
-        id: id
-      }
-    })
+        id: id,
+      },
+    });
     return res.status(201).send(updateDog);
-  } catch(e) {
+  } catch (e) {
     console.error(e);
-    return res.status(500).send({error: "errorr 500"})
+    return res.status(500).send({ error: "errorr 500" });
   }
-})
-
-
-
-
+});
 
 //  /DOGS/:ID
 // DELETE ENDPOINT
-app.delete("/dogs/:id", async(req, res) => {
+app.delete("/dogs/:id", async (req, res) => {
   const id = +req.params.id;
-
-  if(isNaN(id)) {
-    res.status(400).send({message :"id should be a number"})
+  if (isNaN(id)) {
+    res
+      .status(400)
+      .send({ message: "id should be a number" });
   }
-
-
   try {
     const deletedDog = await prisma.dog.delete({
       where: {
-        id: id 
-      }
-    })
-
-    if(!deletedDog){
-      return res.status(400).send("Dog is not delted")
+        id: id,
+      },
+    });
+    if (!deletedDog) {
+      return res.status(400).send("Dog is not delted");
     }
 
-    return res.status(200).send(deletedDog)
-
-  } catch(e) {
+    return res.status(200).send(deletedDog);
+  } catch (e) {
     console.error(e);
     return res.status(204).send("Internal Server Error");
   }
-
-
-})
-
+});
 
 // all your code should go above this line
 app.use(errorHandleMiddleware);
